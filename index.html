@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LogCheck Lite</title>
+<style>
+*{box-sizing:border-box}body{font-family:system-ui;background:#0f172a;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;margin:0}.card{background:#1e293b;padding:22px;border-radius:18px;max-width:420px;width:100%;border:1px solid #334155}.badge{display:inline-block;background:#22c55e20;color:#22c55e;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800}h1{font-size:21px;margin:10px 0 4px}.sub{color:#94a3b8;font-size:13px;margin:0 0 16px}label{font-size:12px;color:#cbd5e1;display:block;margin:12px 0 5px;font-weight:600}input{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:15px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{width:100%;padding:14px;border:none;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}.btn-save{background:#334155;color:#fff;margin-top:14px}.btn-zap{background:#25D366;color:#000;margin-top:10px}.res{margin-top:12px;padding:10px;background:#052e16;border:1px solid #16a34a;color:#22c55e;border-radius:10px;font-size:13px;display:none;text-align:center}.config{background:#0f172a;border-radius:10px;padding:12px;margin-bottom:12px;border:1px solid #334155}
+</style>
+</head>
+<body>
+<div class="card">
+<span class="badge">LOGCHECK LITE • TESTE GRÁTIS</span>
+<h1>Fechar frete em 10s</h1>
+<p class="sub">Preenche e envia pro patrão no WhatsApp na hora.</p>
+<div class="config">
+<label>📱 WhatsApp do Patrão</label>
+<input id="zapPatrao" placeholder="37999999999">
+</div>
+<label>Origem</label><input id="origem" placeholder="Ex: Itaúna - MG">
+<label>Destino</label><input id="destino" placeholder="Ex: São Paulo - SP">
+<div class="grid">
+<div><label>Valor R$</label><input id="frete" type="number" placeholder="2500"></div>
+<div><label>KM</label><input id="km" type="number" placeholder="580"></div>
+</div>
+<button class="btn btn-save" onclick="salvar()">💾 SALVAR</button>
+<button class="btn btn-zap" onclick="enviarZap()">🟢 ENVIAR NO WHATSAPP</button>
+<div id="res" class="res"></div>
+</div>
+<script>
+const zapInput=document.getElementById('zapPatrao');zapInput.value=localStorage.getItem('zapPatrao')||'';
+function salvar(){const o=origem.value.trim(),d=destino.value.trim(),f=frete.value,k=km.value;if(!o||!d||!f||!k){alert('Preencha tudo');return}if(!zapInput.value){alert('Coloca o Zap do patrão');return}localStorage.setItem('zapPatrao',zapInput.value.replace(/\D/g,''));window.ultimo={origem:o,destino:d,frete:f,km:k,data:new Date().toLocaleString('pt-BR')};localStorage.setItem('ultimoLite',JSON.stringify(window.ultimo));res.style.display='block';res.innerText=`✅ Salvo! ${o} → ${d} | R$ ${f}`;}
+function enviarZap(){let ult=JSON.parse(localStorage.getItem('ultimoLite')||'null');if(!ult){alert('Clica em SALVAR primeiro');return}let num=localStorage.getItem('zapPatrao').replace(/\D/g,'');if(!num.startsWith('55'))num='55'+num;const msg=`🚛 *LOGCHECK LITE - FECHAMENTO*%0A%0A📍 Origem: ${ult.origem}%0A📍 Destino: ${ult.destino}%0A💰 Frete: R$ ${ult.frete}%0A🛣️ KM: ${ult.km}km%0A⏰ Data: ${ult.data}`;window.open(`https://wa.me/${num}?text=${msg}`,'_blank');}
+</script>
+</body>
+</html>
