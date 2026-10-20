@@ -1,36 +1,90 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LogCheck Lite</title>
+<title>LogCheck LITE</title>
 <style>
-*{box-sizing:border-box}body{font-family:system-ui;background:#0f172a;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px;margin:0}.card{background:#1e293b;padding:22px;border-radius:18px;max-width:420px;width:100%;border:1px solid #334155}.badge{display:inline-block;background:#22c55e20;color:#22c55e;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800}h1{font-size:21px;margin:10px 0 4px}.sub{color:#94a3b8;font-size:13px;margin:0 0 16px}label{font-size:12px;color:#cbd5e1;display:block;margin:12px 0 5px;font-weight:600}input{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:15px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{width:100%;padding:14px;border:none;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}.btn-save{background:#334155;color:#fff;margin-top:14px}.btn-zap{background:#25D366;color:#000;margin-top:10px}.res{margin-top:12px;padding:10px;background:#052e16;border:1px solid #16a34a;color:#22c55e;border-radius:10px;font-size:13px;display:none;text-align:center}.config{background:#0f172a;border-radius:10px;padding:12px;margin-bottom:12px;border:1px solid #334155}
+body{font-family:Arial; background:#f4f4f4; padding:15px; max-width:400px; margin:auto}
+.card{background:#fff; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+h2{text-align:center; margin:0 0 15px}
+input{width:100%; padding:12px; margin:6px 0; border-radius:8px; border:1px solid #ccc; box-sizing:border-box}
+label{font-weight:bold; font-size:13px; margin-top:10px; display:block}
+.btn{width:100%; background:#25D366; color:#fff; padding:14px; border:none; border-radius:10px; font-size:16px; font-weight:bold; margin-top:15px}
+.result{background:#eef; padding:10px; border-radius:8px; margin-top:15px; white-space:pre-line; font-size:14px}
 </style>
 </head>
 <body>
 <div class="card">
-<span class="badge">LOGCHECK LITE • TESTE GRÁTIS</span>
-<h1>Fechar frete em 10s</h1>
-<p class="sub">Preenche e envia pro patrão no WhatsApp na hora.</p>
-<div class="config">
-<label>📱 WhatsApp do Patrão</label>
-<input id="zapPatrao" placeholder="37999999999">
+<h2>🚛 LOGCHECK LITE</h2>
+
+<label>Origem:</label>
+<input id="origem" placeholder="Ex: Itaúna">
+
+<label>Destino:</label>
+<input id="destino" placeholder="Ex: Araxá">
+
+<label>Km Inicial:</label>
+<input id="kmIni" type="number" placeholder="Ex: 150500" step="0.001">
+
+<label>Data e Horário Inicial:</label>
+<input id="dataIni" type="datetime-local">
+
+<label>Km Final:</label>
+<input id="kmFim" type="number" placeholder="Ex: 150900" step="0.001">
+
+<label>Data e Horário Final:</label>
+<input id="dataFim" type="datetime-local">
+
+<button class="btn" onclick="gerar()">GERAR FECHAMENTO</button>
+
+<div id="saida" class="result" style="display:none"></div>
+<button id="zap" class="btn" style="display:none; background:#128C7E" onclick="enviarZap()">ENVIAR NO WHATSAPP</button>
 </div>
-<label>Origem</label><input id="origem" placeholder="Ex: Itaúna - MG">
-<label>Destino</label><input id="destino" placeholder="Ex: São Paulo - SP">
-<div class="grid">
-<div><label>Valor R$</label><input id="frete" type="number" placeholder="2500"></div>
-<div><label>KM</label><input id="km" type="number" placeholder="580"></div>
-</div>
-<button class="btn btn-save" onclick="salvar()">💾 SALVAR</button>
-<button class="btn btn-zap" onclick="enviarZap()">🟢 ENVIAR NO WHATSAPP</button>
-<div id="res" class="res"></div>
-</div>
+
 <script>
-const zapInput=document.getElementById('zapPatrao');zapInput.value=localStorage.getItem('zapPatrao')||'';
-function salvar(){const o=origem.value.trim(),d=destino.value.trim(),f=frete.value,k=km.value;if(!o||!d||!f||!k){alert('Preencha tudo');return}if(!zapInput.value){alert('Coloca o Zap do patrão');return}localStorage.setItem('zapPatrao',zapInput.value.replace(/\D/g,''));window.ultimo={origem:o,destino:d,frete:f,km:k,data:new Date().toLocaleString('pt-BR')};localStorage.setItem('ultimoLite',JSON.stringify(window.ultimo));res.style.display='block';res.innerText=`✅ Salvo! ${o} → ${d} | R$ ${f}`;}
-function enviarZap(){let ult=JSON.parse(localStorage.getItem('ultimoLite')||'null');if(!ult){alert('Clica em SALVAR primeiro');return}let num=localStorage.getItem('zapPatrao').replace(/\D/g,'');if(!num.startsWith('55'))num='55'+num;const msg=`🚛 *LOGCHECK LITE - FECHAMENTO*%0A%0A📍 Origem: ${ult.origem}%0A📍 Destino: ${ult.destino}%0A💰 Frete: R$ ${ult.frete}%0A🛣️ KM: ${ult.km}km%0A⏰ Data: ${ult.data}`;window.open(`https://wa.me/${num}?text=${msg}`,'_blank');}
+let textoFinal = "";
+function formatarData(dataISO){
+ if(!dataISO) return "";
+ let d = new Date(dataISO);
+ let dia = String(d.getDate()).padStart(2,'0');
+ let mes = String(d.getMonth()+1).padStart(2,'0');
+ let ano = String(d.getFullYear()).slice(-2);
+ let h = String(d.getHours()).padStart(2,'0');
+ let m = String(d.getMinutes()).padStart(2,'0');
+ return `${dia}.${mes}.${ano}. ${h}hs:${m}min`;
+}
+
+function gerar(){
+ let origem = document.getElementById('origem').value || "Não informado";
+ let destino = document.getElementById('destino').value || "Não informado";
+ let kmIni = document.getElementById('kmIni').value || "0";
+ let kmFim = document.getElementById('kmFim').value || "0";
+ let dataIni = formatarData(document.getElementById('dataIni').value);
+ let dataFim = formatarData(document.getElementById('dataFim').value);
+ 
+ let kmIniFormat = Number(kmIni).toLocaleString('pt-BR', {minimumFractionDigits:3});
+ let kmFimFormat = Number(kmFim).toLocaleString('pt-BR', {minimumFractionDigits:3});
+
+ textoFinal = `🚛 *LOGCHECK - FECHAMENTO*
+
+📍 Origem: ${origem}
+📍 Destino: ${destino}
+🛣️ Km Inicial: ${kmIniFormat}
+⏰ Data e horário: ${dataIni}
+🛣️ Km Final: ${kmFimFormat}
+⏰ Data e horário: ${dataFim}
+📏 Total Rodado: ${(Number(kmFim)-Number(kmIni)).toLocaleString('pt-BR')} km`;
+
+ document.getElementById('saida').style.display='block';
+ document.getElementById('saida').innerText = textoFinal;
+ document.getElementById('zap').style.display='block';
+}
+
+function enviarZap(){
+ let url = "https://wa.me/?text=" + encodeURIComponent(textoFinal);
+ window.open(url, "_blank");
+}
 </script>
 </body>
 </html>
