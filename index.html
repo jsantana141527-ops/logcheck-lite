@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LogCheck LITE</title>
+<title>LogCheck LITE - Oficial</title>
 <style>
 body{font-family:Arial; background:#f4f4f4; padding:15px; max-width:400px; margin:auto}
 .card{background:#fff; padding:20px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.1)}
 h2{text-align:center; margin:0 0 15px}
-input{width:100%; padding:12px; margin:6px 0; border-radius:8px; border:1px solid #ccc; box-sizing:border-box}
-label{font-weight:bold; font-size:13px; margin-top:10px; display:block}
+input{width:100%; padding:12px; margin:6px 0; border-radius:8px; border:1px solid #ccc; box-sizing:border-box; font-size:15px}
+label{font-weight:bold; font-size:13px; margin-top:12px; display:block}
 .btn{width:100%; background:#25D366; color:#fff; padding:14px; border:none; border-radius:10px; font-size:16px; font-weight:bold; margin-top:15px}
-.result{background:#eef; padding:10px; border-radius:8px; margin-top:15px; white-space:pre-line; font-size:14px}
+.result{background:#eef; padding:12px; border-radius:8px; margin-top:15px; white-space:pre-line; font-size:14px; line-height:1.6}
 </style>
 </head>
 <body>
@@ -25,16 +25,16 @@ label{font-weight:bold; font-size:13px; margin-top:10px; display:block}
 <input id="destino" placeholder="Ex: Araxá">
 
 <label>Km Inicial:</label>
-<input id="kmIni" type="number" placeholder="Ex: 150500" step="0.001">
+<input id="kmIni" placeholder="Ex: 150.500">
 
-<label>Data e Horário Inicial:</label>
-<input id="dataIni" type="datetime-local">
+<label>Data e horário - Inicial:</label>
+<input id="dataIni" placeholder="Ex: 20.10.26. 15hs:38min">
 
 <label>Km Final:</label>
-<input id="kmFim" type="number" placeholder="Ex: 150900" step="0.001">
+<input id="kmFim" placeholder="Ex: 150.900">
 
-<label>Data e Horário Final:</label>
-<input id="dataFim" type="datetime-local">
+<label>Data e horário - Final:</label>
+<input id="dataFim" placeholder="Ex: 20.10.26. 20hs:30min">
 
 <button class="btn" onclick="gerar()">GERAR FECHAMENTO</button>
 
@@ -44,37 +44,36 @@ label{font-weight:bold; font-size:13px; margin-top:10px; display:block}
 
 <script>
 let textoFinal = "";
-function formatarData(dataISO){
- if(!dataISO) return "";
- let d = new Date(dataISO);
- let dia = String(d.getDate()).padStart(2,'0');
- let mes = String(d.getMonth()+1).padStart(2,'0');
- let ano = String(d.getFullYear()).slice(-2);
- let h = String(d.getHours()).padStart(2,'0');
- let m = String(d.getMinutes()).padStart(2,'0');
- return `${dia}.${mes}.${ano}. ${h}hs:${m}min`;
+
+function limparKm(v){
+  // Pega só números: 150.500 ou 150,500 viram 150500
+  if(!v) return 0;
+  let numeros = v.toString().replace(/[^0-9]/g, '');
+  return parseInt(numeros) || 0;
 }
 
 function gerar(){
- let origem = document.getElementById('origem').value || "Não informado";
- let destino = document.getElementById('destino').value || "Não informado";
- let kmIni = document.getElementById('kmIni').value || "0";
- let kmFim = document.getElementById('kmFim').value || "0";
- let dataIni = formatarData(document.getElementById('dataIni').value);
- let dataFim = formatarData(document.getElementById('dataFim').value);
- 
- let kmIniFormat = Number(kmIni).toLocaleString('pt-BR', {minimumFractionDigits:3});
- let kmFimFormat = Number(kmFim).toLocaleString('pt-BR', {minimumFractionDigits:3});
+ let origem = document.getElementById('origem').value.trim();
+ let destino = document.getElementById('destino').value.trim();
+ let kmIniRaw = document.getElementById('kmIni').value.trim();
+ let kmFimRaw = document.getElementById('kmFim').value.trim();
+ let dataIni = document.getElementById('dataIni').value.trim();
+ let dataFim = document.getElementById('dataFim').value.trim();
+
+ let kmIniNum = limparKm(kmIniRaw);
+ let kmFimNum = limparKm(kmFimRaw);
+ let rodado = kmFimNum - kmIniNum;
+ if(rodado < 0) rodado = 0;
 
  textoFinal = `🚛 *LOGCHECK - FECHAMENTO*
 
 📍 Origem: ${origem}
 📍 Destino: ${destino}
-🛣️ Km Inicial: ${kmIniFormat}
+🛣️ Km Inicial: ${kmIniRaw}
 ⏰ Data e horário: ${dataIni}
-🛣️ Km Final: ${kmFimFormat}
+🛣️ Km Final: ${kmFimRaw}
 ⏰ Data e horário: ${dataFim}
-📏 Total Rodado: ${(Number(kmFim)-Number(kmIni)).toLocaleString('pt-BR')} km`;
+📏 Total Rodado: ${rodado.toLocaleString('pt-BR')} km`;
 
  document.getElementById('saida').style.display='block';
  document.getElementById('saida').innerText = textoFinal;
